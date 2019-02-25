@@ -53,18 +53,23 @@ public final class Integer extends Number implements Comparable<Integer> {
     /**
      * A constant holding the minimum value an {@code int} can
      * have, -2<sup>31</sup>.
+     *
+     * 最小值为 -2^31，注意十六进制 int 在内存中的表示方式
      */
     @Native public static final int   MIN_VALUE = 0x80000000;
 
     /**
      * A constant holding the maximum value an {@code int} can
      * have, 2<sup>31</sup>-1.
+     *
+     * 最大值为 2^31-1
      */
     @Native public static final int   MAX_VALUE = 0x7fffffff;
 
     /**
      * The {@code Class} instance representing the primitive type
      * {@code int}.
+     * 基本类型 int 的 Class 实例
      *
      * @since   JDK1.1
      */
@@ -73,6 +78,7 @@ public final class Integer extends Number implements Comparable<Integer> {
 
     /**
      * All possible chars for representing a number as a String
+     * 所有可能被用来表示数字的字符（进制不同）
      */
     final static char[] digits = {
         '0' , '1' , '2' , '3' , '4' , '5' ,
@@ -542,12 +548,12 @@ public final class Integer extends Number implements Comparable<Integer> {
             throw new NumberFormatException("null");
         }
 
-        if (radix < Character.MIN_RADIX) {
+        if (radix < Character.MIN_RADIX) { // 最小值是 2
             throw new NumberFormatException("radix " + radix +
                                             " less than Character.MIN_RADIX");
         }
 
-        if (radix > Character.MAX_RADIX) {
+        if (radix > Character.MAX_RADIX) { // 最大值是 36
             throw new NumberFormatException("radix " + radix +
                                             " greater than Character.MAX_RADIX");
         }
@@ -561,6 +567,8 @@ public final class Integer extends Number implements Comparable<Integer> {
 
         if (len > 0) {
             char firstChar = s.charAt(0);
+            // '0' == 48, 48 以下都是非数字和字母
+            // '+' == 43, '-' == 45
             if (firstChar < '0') { // Possible leading "+" or "-"
                 if (firstChar == '-') {
                     negative = true;
@@ -575,6 +583,7 @@ public final class Integer extends Number implements Comparable<Integer> {
             multmin = limit / radix;
             while (i < len) {
                 // Accumulating negatively avoids surprises near MAX_VALUE
+                // 将 char 转换为相应进制的 int 值
                 digit = Character.digit(s.charAt(i++),radix);
                 if (digit < 0) {
                     throw NumberFormatException.forInputString(s);
@@ -586,7 +595,7 @@ public final class Integer extends Number implements Comparable<Integer> {
                 if (result < limit + digit) {
                     throw NumberFormatException.forInputString(s);
                 }
-                result -= digit;
+                result -= digit; // 这里采用负数相减的形式，而不是使用正数累加，防止溢出
             }
         } else {
             throw NumberFormatException.forInputString(s);
@@ -677,7 +686,7 @@ public final class Integer extends Number implements Comparable<Integer> {
                     return parseInt(s, radix);
                 } else {
                     long ell = Long.parseLong(s, radix);
-                    if ((ell & 0xffff_ffff_0000_0000L) == 0) {
+                    if ((ell & 0xffff_ffff_0000_0000L) == 0) { // 不超过无符号 int 的最大值
                         return (int) ell;
                     } else {
                         throw new
@@ -834,6 +843,7 @@ public final class Integer extends Number implements Comparable<Integer> {
 
     /**
      * The value of the {@code Integer}.
+     * Integer 包装的值，真正用来存储 int
      *
      * @serial
      */
@@ -1317,6 +1327,7 @@ public final class Integer extends Number implements Comparable<Integer> {
     /**
      * The number of bits used to represent an {@code int} value in two's
      * complement binary form.
+     * 以二进制补码表示 int 值所需的 bit 数
      *
      * @since 1.5
      */
@@ -1325,6 +1336,7 @@ public final class Integer extends Number implements Comparable<Integer> {
     /**
      * The number of bytes used to represent a {@code int} value in two's
      * complement binary form.
+     * 以二进制补码表示 int 值所需的 byte 数  1 byte = 8 bit
      *
      * @since 1.8
      */
@@ -1336,6 +1348,9 @@ public final class Integer extends Number implements Comparable<Integer> {
      * {@code int} value.  Returns zero if the specified value has no
      * one-bits in its two's complement binary representation, that is, if it
      * is equal to zero.
+     *
+     * 返回以二进制补码形式，取左边最高位 1，后面全部填 0 表示的 int 值
+     * 负数最高位为符号位的 1
      *
      * @param i the value whose highest one bit is to be computed
      * @return an {@code int} value with a single one-bit, in the position
@@ -1359,6 +1374,8 @@ public final class Integer extends Number implements Comparable<Integer> {
      * {@code int} value.  Returns zero if the specified value has no
      * one-bits in its two's complement binary representation, that is, if it
      * is equal to zero.
+     *
+     * 与 highestOneBit() 相反，取其二进制补码的右边最低位 1，其余填 0
      *
      * @param i the value whose lowest one bit is to be computed
      * @return an {@code int} value with a single one-bit, in the position
@@ -1384,6 +1401,9 @@ public final class Integer extends Number implements Comparable<Integer> {
      * <li>floor(log<sub>2</sub>(x)) = {@code 31 - numberOfLeadingZeros(x)}
      * <li>ceil(log<sub>2</sub>(x)) = {@code 32 - numberOfLeadingZeros(x - 1)}
      * </ul>
+     *
+     * 返回左边最高位 1 之前的 0 的个数。
+     * 负数最高位为 1，所以都返回 0
      *
      * @param i the value whose number of leading zeros is to be computed
      * @return the number of zero bits preceding the highest-order
@@ -1412,6 +1432,8 @@ public final class Integer extends Number implements Comparable<Integer> {
      * one-bits in its two's complement representation, in other words if it is
      * equal to zero.
      *
+     * 返回右边最低位 1 之后的 0 的个数。
+     *
      * @param i the value whose number of trailing zeros is to be computed
      * @return the number of zero bits following the lowest-order ("rightmost")
      *     one-bit in the two's complement binary representation of the
@@ -1435,6 +1457,8 @@ public final class Integer extends Number implements Comparable<Integer> {
      * Returns the number of one-bits in the two's complement binary
      * representation of the specified {@code int} value.  This function is
      * sometimes referred to as the <i>population count</i>.
+     *
+     * 二进制补码中 1 的个数
      *
      * @param i the value whose bits are to be counted
      * @return the number of one-bits in the two's complement binary
@@ -1488,6 +1512,9 @@ public final class Integer extends Number implements Comparable<Integer> {
      * ignored, even if the distance is negative: {@code rotateRight(val,
      * distance) == rotateRight(val, distance & 0x1F)}.
      *
+     * 将 i 的二进制补码循环右移 distance。
+     * 注意与普通右移不同的是，右移的数字会移到最左边
+     *
      * @param i the value whose bits are to be rotated right
      * @param distance the number of bit positions to rotate right
      * @return the value obtained by rotating the two's complement binary
@@ -1503,6 +1530,8 @@ public final class Integer extends Number implements Comparable<Integer> {
      * Returns the value obtained by reversing the order of the bits in the
      * two's complement binary representation of the specified {@code int}
      * value.
+     *
+     * 反转二进制补码
      *
      * @param i the value to be reversed
      * @return the value obtained by reversing order of the bits in the
@@ -1524,6 +1553,8 @@ public final class Integer extends Number implements Comparable<Integer> {
      * return value is -1 if the specified value is negative; 0 if the
      * specified value is zero; and 1 if the specified value is positive.)
      *
+     * 正数返回 1，负数返回 -1,0 返回 0
+     *
      * @param i the value whose signum is to be computed
      * @return the signum function of the specified {@code int} value.
      * @since 1.5
@@ -1536,6 +1567,8 @@ public final class Integer extends Number implements Comparable<Integer> {
     /**
      * Returns the value obtained by reversing the order of the bytes in the
      * two's complement representation of the specified {@code int} value.
+     *
+     * 以字节为单位反转二进制补码
      *
      * @param i the value whose bytes are to be reversed
      * @return the value obtained by reversing the bytes in the specified
