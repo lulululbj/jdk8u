@@ -135,7 +135,7 @@ public final class Integer extends Number implements Comparable<Integer> {
      */
     public static String toString(int i, int radix) {
         if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
-            radix = 10;
+            radix = 10; // 不合法的进制统一设置为 10
 
         /* Use the faster version */
         if (radix == 10) {
@@ -150,7 +150,7 @@ public final class Integer extends Number implements Comparable<Integer> {
             i = -i;
         }
 
-        while (i <= -radix) {
+        while (i <= -radix) { // 除法求余
             buf[charPos--] = digits[-(i % radix)];
             i = i / radix;
         }
@@ -403,6 +403,7 @@ public final class Integer extends Number implements Comparable<Integer> {
     public static String toString(int i) {
         if (i == Integer.MIN_VALUE)
             return "-2147483648";
+        // 获取长度，负数需 +1，表示符号 '-'
         int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
         char[] buf = new char[size];
         getChars(i, size, buf);
@@ -548,12 +549,12 @@ public final class Integer extends Number implements Comparable<Integer> {
             throw new NumberFormatException("null");
         }
 
-        if (radix < Character.MIN_RADIX) { // 最小值是 2
+        if (radix < Character.MIN_RADIX) { // 进制最小值是 2
             throw new NumberFormatException("radix " + radix +
                                             " less than Character.MIN_RADIX");
         }
 
-        if (radix > Character.MAX_RADIX) { // 最大值是 36
+        if (radix > Character.MAX_RADIX) { // 进制最大值是 36
             throw new NumberFormatException("radix " + radix +
                                             " greater than Character.MAX_RADIX");
         }
@@ -573,7 +574,7 @@ public final class Integer extends Number implements Comparable<Integer> {
                 if (firstChar == '-') {
                     negative = true;
                     limit = Integer.MIN_VALUE;
-                } else if (firstChar != '+')
+                } else if (firstChar != '+') // 第一个字符非数字和字母，也不是 + 或者 -，抛出异常
                     throw NumberFormatException.forInputString(s);
 
                 if (len == 1) // Cannot have lone "+" or "-"
@@ -588,10 +589,16 @@ public final class Integer extends Number implements Comparable<Integer> {
                 if (digit < 0) {
                     throw NumberFormatException.forInputString(s);
                 }
+                /*
+                 * multmin = limit / radix,
+                 * 如果这里 result > multmin , 下一步 result *= radix 就会溢出
+                 */
                 if (result < multmin) {
                     throw NumberFormatException.forInputString(s);
                 }
                 result *= radix;
+                // 也是溢出检查，例如 parseInt("2147483648",10) 就无法通过此检查
+                // 2147483648 == Integer.MAX_VALUE + 1
                 if (result < limit + digit) {
                     throw NumberFormatException.forInputString(s);
                 }
@@ -629,6 +636,9 @@ public final class Integer extends Number implements Comparable<Integer> {
      * specified by the second argument.  An unsigned integer maps the
      * values usually associated with negative numbers to positive
      * numbers larger than {@code MAX_VALUE}.
+     *
+     * 按指定进制将 String 转换为无符号 int。
+     * 对于大于 MAX_VALUE 的值，通过使用负数表示
      *
      * The characters in the string must all be digits of the
      * specified radix (as determined by whether {@link
@@ -676,19 +686,23 @@ public final class Integer extends Number implements Comparable<Integer> {
         int len = s.length();
         if (len > 0) {
             char firstChar = s.charAt(0);
-            if (firstChar == '-') {
+            if (firstChar == '-') { // 无符号数以 - 开头，直接抛出异常
                 throw new
                     NumberFormatException(String.format("Illegal leading minus sign " +
                                                        "on unsigned string %s.", s));
             } else {
+                /*
+                 *  确定再有符号 int 取值范围内，直接调用 parseInt() 当做有符号数处理
+                 *  其他情况当做 long 值处理，调用 Long.parseLong()
+                 */
                 if (len <= 5 || // Integer.MAX_VALUE in Character.MAX_RADIX is 6 digits
                     (radix == 10 && len <= 9) ) { // Integer.MAX_VALUE in base 10 is 10 digits
                     return parseInt(s, radix);
                 } else {
                     long ell = Long.parseLong(s, radix);
-                    if ((ell & 0xffff_ffff_0000_0000L) == 0) { // 不超过无符号 int 的最大值
+                    if ((ell & 0xffff_ffff_0000_0000L) == 0) { // 不超过无符号 int 的最大值，直接强转 int 返回
                         return (int) ell;
-                    } else {
+                    } else { // 超过无符号 int 最大值，抛出异常
                         throw new
                             NumberFormatException(String.format("String value %s exceeds " +
                                                                 "range of unsigned int.", s));
@@ -830,6 +844,10 @@ public final class Integer extends Number implements Comparable<Integer> {
      *
      * This method will always cache values in the range -128 to 127,
      * inclusive, and may cache other values outside of this range.
+     *
+     * 自动装箱的时候会调用
+     * -128 ~ 127 是缓存在内存中的，超过此范围重新创建 Integer 对象
+     * high 值默认为 127，可以通过系统属性配置
      *
      * @param  i an {@code int} value.
      * @return an {@code Integer} instance representing {@code i}.
