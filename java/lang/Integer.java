@@ -69,7 +69,7 @@ public final class Integer extends Number implements Comparable<Integer> {
     /**
      * The {@code Class} instance representing the primitive type
      * {@code int}.
-     * 基本类型 int 的 Class 实例
+     * 基本类型 int 的包装类的 Class 实例
      *
      * @since   JDK1.1
      */
@@ -1193,13 +1193,15 @@ public final class Integer extends Number implements Comparable<Integer> {
             throw new NumberFormatException("Zero length string");
         char firstChar = nm.charAt(0);
         // Handle sign, if present
-        if (firstChar == '-') {
+        if (firstChar == '-') { // 负数
             negative = true;
             index++;
-        } else if (firstChar == '+')
+        } else if (firstChar == '+') // 正数
             index++;
 
         // Handle radix specifier, if present
+        // 以 "0x" "0X" "#" 开头表示十六进制
+        // 以 "0" 开头表示八进制
         if (nm.startsWith("0x", index) || nm.startsWith("0X", index)) {
             index += 2;
             radix = 16;
@@ -1222,7 +1224,7 @@ public final class Integer extends Number implements Comparable<Integer> {
         } catch (NumberFormatException e) {
             // If number is Integer.MIN_VALUE, we'll end up here. The next line
             // handles this case, and causes any genuine format error to be
-            // rethrown.
+            // rethrown. Integer.MIN_VALUE 会进入此分支
             String constant = negative ? ("-" + nm.substring(index))
                                        : nm.substring(index);
             result = Integer.valueOf(constant, radix);
