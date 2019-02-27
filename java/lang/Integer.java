@@ -448,20 +448,23 @@ public final class Integer extends Number implements Comparable<Integer> {
         }
 
         // Generate two digits per iteration
+        // 每次取 i 的最后两位
         while (i >= 65536) {
             q = i / 100;
         // really: r = i - (q * 100);
+            // r = i - (q * (2^6 + 2^5 + 2^2))
             r = i - ((q << 6) + (q << 5) + (q << 2));
             i = q;
-            buf [--charPos] = DigitOnes[r];
-            buf [--charPos] = DigitTens[r];
+            buf [--charPos] = DigitOnes[r]; // 取余操作
+            buf [--charPos] = DigitTens[r]; // 除法操作
         }
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
         for (;;) {
-            q = (i * 52429) >>> (16+3);
+            q = (i * 52429) >>> (16+3); // q = i * 10
             r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
+            // 此时 r 为数字 i 的最后一位
             buf [--charPos] = digits [r];
             i = q;
             if (i == 0) break;
