@@ -55,18 +55,24 @@ public final class Long extends Number implements Comparable<Long> {
     /**
      * A constant holding the minimum value a {@code long} can
      * have, -2<sup>63</sup>.
+     *
+     * 最小值为 -2^63
      */
     @Native public static final long MIN_VALUE = 0x8000000000000000L;
 
     /**
      * A constant holding the maximum value a {@code long} can
      * have, 2<sup>63</sup>-1.
+     *
+     * 最大值为 2^63 - 1
      */
     @Native public static final long MAX_VALUE = 0x7fffffffffffffffL;
 
     /**
      * The {@code Class} instance representing the primitive type
      * {@code long}.
+     *
+     * 基本类型 long 的包装类实例
      *
      * @since   JDK1.1
      */
@@ -119,9 +125,9 @@ public final class Long extends Number implements Comparable<Long> {
      */
     public static String toString(long i, int radix) {
         if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
-            radix = 10;
+            radix = 10; // 2 <= radix <= 36,超出范围的默认设为 10
         if (radix == 10)
-            return toString(i);
+            return toString(i); // user the faster version
         char[] buf = new char[65];
         int charPos = 64;
         boolean negative = (i < 0);
@@ -130,7 +136,7 @@ public final class Long extends Number implements Comparable<Long> {
             i = -i;
         }
 
-        while (i <= -radix) {
+        while (i <= -radix) { // 循环求余
             buf[charPos--] = Integer.digits[(int)(-(i % radix))];
             i = i / radix;
         }
@@ -387,6 +393,8 @@ public final class Long extends Number implements Comparable<Long> {
      * argument and the radix 10 were given as arguments to the {@link
      * #toString(long, int)} method.
      *
+     * long 值转换为十进制字符串
+     *
      * @param   i   a {@code long} to be converted.
      * @return  a string representation of the argument in base&nbsp;10.
      */
@@ -437,6 +445,12 @@ public final class Long extends Number implements Comparable<Long> {
             i = -i;
         }
 
+        /*
+         * 下面分成了三段循环：
+         *  1. i > Integer.MAX_VALUE 时，q 使用 long 型
+         *  2. i <= Integer.MAX_VALUE 时，和 Integer 的处理方式一模一样
+         */
+
         // Get 2 digits/iteration using longs until quotient fits into an int
         while (i > Integer.MAX_VALUE) {
             q = i / 100;
@@ -474,6 +488,8 @@ public final class Long extends Number implements Comparable<Long> {
     }
 
     // Requires positive x
+    // 和 Integer 中的 stringSize() 方法原理一致
+    // long 最大值 19 位
     static int stringSize(long x) {
         long p = 10;
         for (int i=1; i<19; i++) {
@@ -552,6 +568,7 @@ public final class Long extends Number implements Comparable<Long> {
             throw new NumberFormatException("null");
         }
 
+        // radix <2 || radix > 36, 直接抛出异常
         if (radix < Character.MIN_RADIX) {
             throw new NumberFormatException("radix " + radix +
                                             " less than Character.MIN_RADIX");
@@ -570,6 +587,8 @@ public final class Long extends Number implements Comparable<Long> {
 
         if (len > 0) {
             char firstChar = s.charAt(0);
+            // '0' == 48, 48 以下都是非数字和字母
+            // '+' == 43, '-' == 45
             if (firstChar < '0') { // Possible leading "+" or "-"
                 if (firstChar == '-') {
                     negative = true;
@@ -584,18 +603,19 @@ public final class Long extends Number implements Comparable<Long> {
             multmin = limit / radix;
             while (i < len) {
                 // Accumulating negatively avoids surprises near MAX_VALUE
+                // 将 char 转换为相应进制的 int 值
                 digit = Character.digit(s.charAt(i++),radix);
                 if (digit < 0) {
                     throw NumberFormatException.forInputString(s);
                 }
-                if (result < multmin) {
+                if (result < multmin) { // 溢出检查
                     throw NumberFormatException.forInputString(s);
                 }
                 result *= radix;
-                if (result < limit + digit) {
+                if (result < limit + digit) { // 溢出检查
                     throw NumberFormatException.forInputString(s);
                 }
-                result -= digit;
+                result -= digit; // 这里采用负数累减的形式，而不是使用正数累加，防止溢出
             }
         } else {
             throw NumberFormatException.forInputString(s);
@@ -683,11 +703,14 @@ public final class Long extends Number implements Comparable<Long> {
         int len = s.length();
         if (len > 0) {
             char firstChar = s.charAt(0);
-            if (firstChar == '-') {
+            if (firstChar == '-') { // 无符号数以 - 开头，直接抛出异常
                 throw new
                     NumberFormatException(String.format("Illegal leading minus sign " +
                                                        "on unsigned string %s.", s));
             } else {
+                /*
+                 *  确定在有符号 long 取值范围内，直接调用 parseLong() 当做有符号数处理
+                 */
                 if (len <= 12 || // Long.MAX_VALUE in Character.MAX_RADIX is 13 digits
                     (radix == 10 && len <= 18) ) { // Long.MAX_VALUE in base 10 is 19 digits
                     return parseLong(s, radix);
@@ -700,6 +723,7 @@ public final class Long extends Number implements Comparable<Long> {
                     throw new NumberFormatException("Bad digit at end of " + s);
                 }
                 long result = first * radix + second;
+                // 只有发生溢出时， result 才会小于 first
                 if (compareUnsigned(result, first) < 0) {
                     /*
                      * The maximum unsigned value, (2^64)-1, takes at
@@ -715,6 +739,10 @@ public final class Long extends Number implements Comparable<Long> {
                      * situations where an unsigned overflow occurs
                      * incorporating the contribution of the final
                      * digit.
+                     *
+                     * 无符号 long 的最大值是 (2^64)-1,比有符号 long 的最大值多一位数字，
+                     * 因此，我们先将 (len-1) 个数字当做有符号类型解析，如果解析结果溢出了，
+                     * 那么 len 个数字必定也溢出了无符号类型最大值
                      */
                     throw new NumberFormatException(String.format("String value %s exceeds " +
                                                                   "range of unsigned long.", s));
@@ -810,7 +838,7 @@ public final class Long extends Number implements Comparable<Long> {
 
         static {
             for(int i = 0; i < cache.length; i++)
-                cache[i] = new Long(i - 128);
+                cache[i] = new Long(i - 128); // 仍然缓存的是 -128 - 127
         }
     }
 
