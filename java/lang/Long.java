@@ -376,11 +376,11 @@ public final class Long extends Number implements Comparable<Long> {
      */
      static int formatUnsignedLong(long val, int shift, char[] buf, int offset, int len) {
         int charPos = len;
-        int radix = 1 << shift;
-        int mask = radix - 1;
+        int radix = 1 << shift; // 进制
+        int mask = radix - 1; // 掩码，二进制都为 1
         do {
-            buf[offset + --charPos] = Integer.digits[((int) val) & mask];
-            val >>>= shift;
+            buf[offset + --charPos] = Integer.digits[((int) val) & mask]; // 取出 val 中对应进制的最后一位
+            val >>>= shift; // 无符号右移 shift，高位补 0，移走上一步已经取出的最后一位数据
         } while (val != 0 && charPos > 0);
 
         return charPos;
