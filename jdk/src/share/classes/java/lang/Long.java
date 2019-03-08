@@ -55,18 +55,24 @@ public final class Long extends Number implements Comparable<Long> {
     /**
      * A constant holding the minimum value a {@code long} can
      * have, -2<sup>63</sup>.
+     *
+     * 最小值为 -2^63
      */
     @Native public static final long MIN_VALUE = 0x8000000000000000L;
 
     /**
      * A constant holding the maximum value a {@code long} can
      * have, 2<sup>63</sup>-1.
+     *
+     * 最大值为 2^63 - 1
      */
     @Native public static final long MAX_VALUE = 0x7fffffffffffffffL;
 
     /**
      * The {@code Class} instance representing the primitive type
      * {@code long}.
+     *
+     * 基本类型 long 的包装类实例
      *
      * @since   JDK1.1
      */
@@ -119,9 +125,9 @@ public final class Long extends Number implements Comparable<Long> {
      */
     public static String toString(long i, int radix) {
         if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
-            radix = 10;
+            radix = 10; // 2 <= radix <= 36,超出范围的默认设为 10
         if (radix == 10)
-            return toString(i);
+            return toString(i); // user the faster version
         char[] buf = new char[65];
         int charPos = 64;
         boolean negative = (i < 0);
@@ -130,7 +136,7 @@ public final class Long extends Number implements Comparable<Long> {
             i = -i;
         }
 
-        while (i <= -radix) {
+        while (i <= -radix) { // 循环求余
             buf[charPos--] = Integer.digits[(int)(-(i % radix))];
             i = i / radix;
         }
@@ -174,36 +180,36 @@ public final class Long extends Number implements Comparable<Long> {
             return toString(i, radix);
         else {
             switch (radix) {
-            case 2:
-                return toBinaryString(i);
+                case 2:
+                    return toBinaryString(i);
 
-            case 4:
-                return toUnsignedString0(i, 2);
+                case 4:
+                    return toUnsignedString0(i, 2);
 
-            case 8:
-                return toOctalString(i);
+                case 8:
+                    return toOctalString(i);
 
-            case 10:
-                /*
-                 * We can get the effect of an unsigned division by 10
-                 * on a long value by first shifting right, yielding a
-                 * positive value, and then dividing by 5.  This
-                 * allows the last digit and preceding digits to be
-                 * isolated more quickly than by an initial conversion
-                 * to BigInteger.
-                 */
-                long quot = (i >>> 1) / 5;
-                long rem = i - quot * 10;
-                return toString(quot) + rem;
+                case 10:
+                    /*
+                     * We can get the effect of an unsigned division by 10
+                     * on a long value by first shifting right, yielding a
+                     * positive value, and then dividing by 5.  This
+                     * allows the last digit and preceding digits to be
+                     * isolated more quickly than by an initial conversion
+                     * to BigInteger.
+                     */
+                    long quot = (i >>> 1) / 5;
+                    long rem = i - quot * 10;
+                    return toString(quot) + rem;
 
-            case 16:
-                return toHexString(i);
+                case 16:
+                    return toHexString(i);
 
-            case 32:
-                return toUnsignedString0(i, 5);
+                case 32:
+                    return toUnsignedString0(i, 5);
 
-            default:
-                return toUnsignedBigInteger(i).toString(radix);
+                default:
+                    return toUnsignedBigInteger(i).toString(radix);
             }
         }
     }
@@ -221,7 +227,7 @@ public final class Long extends Number implements Comparable<Long> {
 
             // return (upper << 32) + lower
             return (BigInteger.valueOf(Integer.toUnsignedLong(upper))).shiftLeft(32).
-                add(BigInteger.valueOf(Integer.toUnsignedLong(lower)));
+                    add(BigInteger.valueOf(Integer.toUnsignedLong(lower)));
         }
     }
 
@@ -368,13 +374,13 @@ public final class Long extends Number implements Comparable<Long> {
      * @param len the number of characters to write
      * @return the lowest character location used
      */
-     static int formatUnsignedLong(long val, int shift, char[] buf, int offset, int len) {
+    static int formatUnsignedLong(long val, int shift, char[] buf, int offset, int len) {
         int charPos = len;
-        int radix = 1 << shift;
-        int mask = radix - 1;
+        int radix = 1 << shift; // 进制
+        int mask = radix - 1; // 掩码，二进制都为 1
         do {
-            buf[offset + --charPos] = Integer.digits[((int) val) & mask];
-            val >>>= shift;
+            buf[offset + --charPos] = Integer.digits[((int) val) & mask]; // 取出 val 中对应进制的最后一位
+            val >>>= shift; // 无符号右移 shift，高位补 0，移走上一步已经取出的最后一位数据
         } while (val != 0 && charPos > 0);
 
         return charPos;
@@ -386,6 +392,8 @@ public final class Long extends Number implements Comparable<Long> {
      * representation and returned as a string, exactly as if the
      * argument and the radix 10 were given as arguments to the {@link
      * #toString(long, int)} method.
+     *
+     * long 值转换为十进制字符串
      *
      * @param   i   a {@code long} to be converted.
      * @return  a string representation of the argument in base&nbsp;10.
@@ -437,6 +445,12 @@ public final class Long extends Number implements Comparable<Long> {
             i = -i;
         }
 
+        /*
+         * 下面分成了三段循环：
+         *  1. i > Integer.MAX_VALUE 时，q 使用 long 型
+         *  2. i <= Integer.MAX_VALUE 时，和 Integer 的处理方式一模一样
+         */
+
         // Get 2 digits/iteration using longs until quotient fits into an int
         while (i > Integer.MAX_VALUE) {
             q = i / 100;
@@ -474,6 +488,8 @@ public final class Long extends Number implements Comparable<Long> {
     }
 
     // Requires positive x
+    // 和 Integer 中的 stringSize() 方法原理一致
+    // long 最大值 19 位
     static int stringSize(long x) {
         long p = 10;
         for (int i=1; i<19; i++) {
@@ -546,19 +562,20 @@ public final class Long extends Number implements Comparable<Long> {
      *             parsable {@code long}.
      */
     public static long parseLong(String s, int radix)
-              throws NumberFormatException
+            throws NumberFormatException
     {
         if (s == null) {
             throw new NumberFormatException("null");
         }
 
+        // radix <2 || radix > 36, 直接抛出异常
         if (radix < Character.MIN_RADIX) {
             throw new NumberFormatException("radix " + radix +
-                                            " less than Character.MIN_RADIX");
+                    " less than Character.MIN_RADIX");
         }
         if (radix > Character.MAX_RADIX) {
             throw new NumberFormatException("radix " + radix +
-                                            " greater than Character.MAX_RADIX");
+                    " greater than Character.MAX_RADIX");
         }
 
         long result = 0;
@@ -570,6 +587,8 @@ public final class Long extends Number implements Comparable<Long> {
 
         if (len > 0) {
             char firstChar = s.charAt(0);
+            // '0' == 48, 48 以下都是非数字和字母
+            // '+' == 43, '-' == 45
             if (firstChar < '0') { // Possible leading "+" or "-"
                 if (firstChar == '-') {
                     negative = true;
@@ -584,18 +603,19 @@ public final class Long extends Number implements Comparable<Long> {
             multmin = limit / radix;
             while (i < len) {
                 // Accumulating negatively avoids surprises near MAX_VALUE
+                // 将 char 转换为相应进制的 int 值
                 digit = Character.digit(s.charAt(i++),radix);
                 if (digit < 0) {
                     throw NumberFormatException.forInputString(s);
                 }
-                if (result < multmin) {
+                if (result < multmin) { // 溢出检查
                     throw NumberFormatException.forInputString(s);
                 }
                 result *= radix;
-                if (result < limit + digit) {
+                if (result < limit + digit) { // 溢出检查
                     throw NumberFormatException.forInputString(s);
                 }
-                result -= digit;
+                result -= digit; // 这里采用负数累减的形式，而不是使用正数累加，防止溢出
             }
         } else {
             throw NumberFormatException.forInputString(s);
@@ -675,7 +695,7 @@ public final class Long extends Number implements Comparable<Long> {
      * @since 1.8
      */
     public static long parseUnsignedLong(String s, int radix)
-                throws NumberFormatException {
+            throws NumberFormatException {
         if (s == null)  {
             throw new NumberFormatException("null");
         }
@@ -683,13 +703,16 @@ public final class Long extends Number implements Comparable<Long> {
         int len = s.length();
         if (len > 0) {
             char firstChar = s.charAt(0);
-            if (firstChar == '-') {
+            if (firstChar == '-') { // 无符号数以 - 开头，直接抛出异常
                 throw new
-                    NumberFormatException(String.format("Illegal leading minus sign " +
-                                                       "on unsigned string %s.", s));
+                        NumberFormatException(String.format("Illegal leading minus sign " +
+                        "on unsigned string %s.", s));
             } else {
+                /*
+                 *  确定在有符号 long 取值范围内，直接调用 parseLong() 当做有符号数处理
+                 */
                 if (len <= 12 || // Long.MAX_VALUE in Character.MAX_RADIX is 13 digits
-                    (radix == 10 && len <= 18) ) { // Long.MAX_VALUE in base 10 is 19 digits
+                        (radix == 10 && len <= 18) ) { // Long.MAX_VALUE in base 10 is 19 digits
                     return parseLong(s, radix);
                 }
 
@@ -700,6 +723,7 @@ public final class Long extends Number implements Comparable<Long> {
                     throw new NumberFormatException("Bad digit at end of " + s);
                 }
                 long result = first * radix + second;
+                // 只有发生溢出时， result 才会小于 first
                 if (compareUnsigned(result, first) < 0) {
                     /*
                      * The maximum unsigned value, (2^64)-1, takes at
@@ -715,9 +739,13 @@ public final class Long extends Number implements Comparable<Long> {
                      * situations where an unsigned overflow occurs
                      * incorporating the contribution of the final
                      * digit.
+                     *
+                     * 无符号 long 的最大值是 (2^64)-1,比有符号 long 的最大值多一位数字，
+                     * 因此，我们先将 (len-1) 个数字当做有符号类型解析，如果解析结果溢出了，
+                     * 那么 len 个数字必定也溢出了无符号类型最大值
                      */
                     throw new NumberFormatException(String.format("String value %s exceeds " +
-                                                                  "range of unsigned long.", s));
+                            "range of unsigned long.", s));
                 }
                 return result;
             }
@@ -810,7 +838,7 @@ public final class Long extends Number implements Comparable<Long> {
 
         static {
             for(int i = 0; i < cache.length; i++)
-                cache[i] = new Long(i - 128);
+                cache[i] = new Long(i - 128); // 仍然缓存的是 -128 - 127
         }
     }
 
@@ -924,7 +952,7 @@ public final class Long extends Number implements Comparable<Long> {
             // handles this case, and causes any genuine format error to be
             // rethrown.
             String constant = negative ? ("-" + nm.substring(index))
-                                       : nm.substring(index);
+                    : nm.substring(index);
             result = Long.valueOf(constant, radix);
         }
         return result;
@@ -1304,7 +1332,7 @@ public final class Long extends Number implements Comparable<Long> {
              * algorithms.
              */
             return toUnsignedBigInteger(dividend).
-                divide(toUnsignedBigInteger(divisor)).longValue();
+                    divide(toUnsignedBigInteger(divisor)).longValue();
         }
     }
 
@@ -1328,7 +1356,7 @@ public final class Long extends Number implements Comparable<Long> {
                 return dividend;
             else
                 return toUnsignedBigInteger(dividend).
-                    remainder(toUnsignedBigInteger(divisor)).longValue();
+                        remainder(toUnsignedBigInteger(divisor)).longValue();
         }
     }
 
@@ -1415,7 +1443,7 @@ public final class Long extends Number implements Comparable<Long> {
      */
     public static int numberOfLeadingZeros(long i) {
         // HD, Figure 5-6
-         if (i == 0)
+        if (i == 0)
             return 64;
         int n = 1;
         int x = (int)(i >>> 32);
@@ -1465,7 +1493,7 @@ public final class Long extends Number implements Comparable<Long> {
      *     representation of the specified {@code long} value.
      * @since 1.5
      */
-     public static int bitCount(long i) {
+    public static int bitCount(long i) {
         // HD, Figure 5-14
         i = i - ((i >>> 1) & 0x5555555555555555L);
         i = (i & 0x3333333333333333L) + ((i >>> 2) & 0x3333333333333333L);
@@ -1474,7 +1502,7 @@ public final class Long extends Number implements Comparable<Long> {
         i = i + (i >>> 16);
         i = i + (i >>> 32);
         return (int)i & 0x7f;
-     }
+    }
 
     /**
      * Returns the value obtained by rotating the two's complement binary
@@ -1541,7 +1569,7 @@ public final class Long extends Number implements Comparable<Long> {
         i = (i & 0x0f0f0f0f0f0f0f0fL) << 4 | (i >>> 4) & 0x0f0f0f0f0f0f0f0fL;
         i = (i & 0x00ff00ff00ff00ffL) << 8 | (i >>> 8) & 0x00ff00ff00ff00ffL;
         i = (i << 48) | ((i & 0xffff0000L) << 16) |
-            ((i >>> 16) & 0xffff0000L) | (i >>> 48);
+                ((i >>> 16) & 0xffff0000L) | (i >>> 48);
         return i;
     }
 
@@ -1571,7 +1599,7 @@ public final class Long extends Number implements Comparable<Long> {
     public static long reverseBytes(long i) {
         i = (i & 0x00ff00ff00ff00ffL) << 8 | (i >>> 8) & 0x00ff00ff00ff00ffL;
         return (i << 48) | ((i & 0xffff0000L) << 16) |
-            ((i >>> 16) & 0xffff0000L) | (i >>> 48);
+                ((i >>> 16) & 0xffff0000L) | (i >>> 48);
     }
 
     /**
