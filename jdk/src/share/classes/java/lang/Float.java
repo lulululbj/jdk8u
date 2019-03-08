@@ -51,6 +51,9 @@ public final class Float extends Number implements Comparable<Float> {
      * A constant holding the positive infinity of type
      * {@code float}. It is equal to the value returned by
      * {@code Float.intBitsToFloat(0x7f800000)}.
+     *
+     * 0 11111111 00000000000000000000000
+     * 正无穷，符号位是 0，阶码域都是 1，尾数域都是 0
      */
     public static final float POSITIVE_INFINITY = 1.0f / 0.0f;
 
@@ -58,6 +61,9 @@ public final class Float extends Number implements Comparable<Float> {
      * A constant holding the negative infinity of type
      * {@code float}. It is equal to the value returned by
      * {@code Float.intBitsToFloat(0xff800000)}.
+     *
+     * 0 11111111 00000000000000000000000
+     * 负无穷，符号位是 1，阶码域都是 1，尾数域都是 0
      */
     public static final float NEGATIVE_INFINITY = -1.0f / 0.0f;
 
@@ -65,6 +71,9 @@ public final class Float extends Number implements Comparable<Float> {
      * A constant holding a Not-a-Number (NaN) value of type
      * {@code float}.  It is equivalent to the value returned by
      * {@code Float.intBitsToFloat(0x7fc00000)}.
+     *
+     * 0 11111111 10000000000000000000000
+     * Not a number，符号位为 0，阶码域都是 1，尾数域不为 0
      */
     public static final float NaN = 0.0f / 0.0f;
 
@@ -74,6 +83,9 @@ public final class Float extends Number implements Comparable<Float> {
      * It is equal to the hexadecimal floating-point literal
      * {@code 0x1.fffffeP+127f} and also equal to
      * {@code Float.intBitsToFloat(0x7f7fffff)}.
+     *
+     * 0 11111110 11111111111111111111111
+     * 最大值，阶码为 127，尾数域都是 1
      */
     public static final float MAX_VALUE = 0x1.fffffeP+127f; // 3.4028235e+38f
 
@@ -82,6 +94,9 @@ public final class Float extends Number implements Comparable<Float> {
      * {@code float}, 2<sup>-126</sup>.  It is equal to the
      * hexadecimal floating-point literal {@code 0x1.0p-126f} and also
      * equal to {@code Float.intBitsToFloat(0x00800000)}.
+     *
+     * 0 00000001 00000000000000000000000
+     * 最小的规格化数（正数）
      *
      * @since 1.6
      */
@@ -92,6 +107,9 @@ public final class Float extends Number implements Comparable<Float> {
      * {@code float}, 2<sup>-149</sup>. It is equal to the
      * hexadecimal floating-point literal {@code 0x0.000002P-126f}
      * and also equal to {@code Float.intBitsToFloat(0x1)}.
+     *
+     * 0 00000000 00000000000000000000001
+     * 最小的非规格化数（正数）
      */
     public static final float MIN_VALUE = 0x0.000002P-126f; // 1.4e-45f
 
@@ -99,6 +117,8 @@ public final class Float extends Number implements Comparable<Float> {
      * Maximum exponent a finite {@code float} variable may have.  It
      * is equal to the value returned by {@code
      * Math.getExponent(Float.MAX_VALUE)}.
+     *
+     * 指数域（阶码）最大值
      *
      * @since 1.6
      */
@@ -109,6 +129,8 @@ public final class Float extends Number implements Comparable<Float> {
      * It is equal to the value returned by {@code
      * Math.getExponent(Float.MIN_NORMAL)}.
      *
+     * 指数域（阶码）最小值
+     *
      * @since 1.6
      */
     public static final int MIN_EXPONENT = -126;
@@ -116,12 +138,16 @@ public final class Float extends Number implements Comparable<Float> {
     /**
      * The number of bits used to represent a {@code float} value.
      *
+     * float 占 32 bits
+     *
      * @since 1.5
      */
     public static final int SIZE = 32;
 
     /**
      * The number of bytes used to represent a {@code float} value.
+     *
+     * float 占 4 bytes
      *
      * @since 1.8
      */

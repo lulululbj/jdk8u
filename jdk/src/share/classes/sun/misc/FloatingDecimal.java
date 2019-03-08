@@ -1842,7 +1842,7 @@ public class FloatingDecimal{
                 throw new NumberFormatException("empty String");
             }
             int i = 0;
-            switch (in.charAt(i)){
+            switch (in.charAt(i)){ // 处理符号位
             case '-':
                 isNegative = true;
                 //FALLTHROUGH
@@ -1851,19 +1851,19 @@ public class FloatingDecimal{
                 signSeen = true;
             }
             c = in.charAt(i);
-            if(c == 'N') { // Check for NaN
+            if(c == 'N') { // Check for NaN 是否为 NaN
                 if((len-i)==NAN_LENGTH && in.indexOf(NAN_REP,i)==i) {
                     return A2BC_NOT_A_NUMBER;
                 }
                 // something went wrong, throw exception
                 break parseNumber;
-            } else if(c == 'I') { // Check for Infinity strings
+            } else if(c == 'I') { // Check for Infinity strings 是否为无穷值
                 if((len-i)==INFINITY_LENGTH && in.indexOf(INFINITY_REP,i)==i) {
                     return isNegative? A2BC_NEGATIVE_INFINITY : A2BC_POSITIVE_INFINITY;
                 }
                 // something went wrong, throw exception
                 break parseNumber;
-            } else if (c == '0')  { // check for hexadecimal floating-point number
+            } else if (c == '0')  { // check for hexadecimal floating-point number 是否是十六进制字符串
                 if (len > i+1 ) {
                     char ch = in.charAt(i+1);
                     if (ch == 'x' || ch == 'X' ) { // possible hex string
@@ -1880,7 +1880,7 @@ public class FloatingDecimal{
             int nTrailZero= 0;
 
         skipLeadingZerosLoop:
-            while (i < len) {
+            while (i < len) { // 跳过开头的 0，无效值
                 c = in.charAt(i);
                 if (c == '0') {
                     nLeadZero++;
@@ -1889,7 +1889,7 @@ public class FloatingDecimal{
                         // already saw one ., this is the 2nd.
                         throw new NumberFormatException("multiple points");
                     }
-                    decPt = i;
+                    decPt = i; // 记录小数点位置
                     if (signSeen) {
                         decPt -= 1;
                     }
