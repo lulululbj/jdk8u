@@ -46,12 +46,16 @@ public final class Byte extends Number implements Comparable<Byte> {
     /**
      * A constant holding the minimum value a {@code byte} can
      * have, -2<sup>7</sup>.
+     *
+     * 最小值，-2^7
      */
     public static final byte   MIN_VALUE = -128;
 
     /**
      * A constant holding the maximum value a {@code byte} can
      * have, 2<sup>7</sup>-1.
+     *
+     * 最大值 2^7-1
      */
     public static final byte   MAX_VALUE = 127;
 
@@ -80,7 +84,7 @@ public final class Byte extends Number implements Comparable<Byte> {
         static final Byte cache[] = new Byte[-(-128) + 127 + 1];
 
         static {
-            for(int i = 0; i < cache.length; i++)
+            for(int i = 0; i < cache.length; i++) // 缓存 -128 - 127
                 cache[i] = new Byte((byte)(i - 128));
         }
     }
@@ -93,6 +97,8 @@ public final class Byte extends Number implements Comparable<Byte> {
      * {@link #Byte(byte)}, as this method is likely to yield
      * significantly better space and time performance since
      * all byte values are cached.
+     *
+     * 所有的 byte 都缓存了
      *
      * @param  b a byte value.
      * @return a {@code Byte} instance representing {@code b}.
@@ -503,6 +509,8 @@ public final class Byte extends Number implements Comparable<Byte> {
      * The number of bits used to represent a {@code byte} value in two's
      * complement binary form.
      *
+     * Byte 占 8 bits
+     *
      * @since 1.5
      */
     public static final int SIZE = 8;
@@ -510,6 +518,8 @@ public final class Byte extends Number implements Comparable<Byte> {
     /**
      * The number of bytes used to represent a {@code byte} value in two's
      * complement binary form.
+     *
+     * Byte 占 1 byte
      *
      * @since 1.8
      */

@@ -110,10 +110,14 @@ import java.util.regex.PatternSyntaxException;
 
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
-    /** The value is used for character storage. */
+    /** The value is used for character storage.
+     *  存储字符串，final 修饰，不可变
+     */
     private final char value[];
 
-    /** Cache the hash code for the string */
+    /** Cache the hash code for the string
+     *  缓存字符串的 hash，默认为 0
+     */
     private int hash; // Default to 0
 
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
@@ -133,6 +137,8 @@ public final class String
      * Initializes a newly created {@code String} object so that it represents
      * an empty character sequence.  Note that use of this constructor is
      * unnecessary since Strings are immutable.
+     *
+     * 由于 String 是不可变的，所以这个构造函数没什么意义
      */
     public String() {
         this.value = "".value;
@@ -145,6 +151,7 @@ public final class String
      * explicit copy of {@code original} is needed, use of this constructor is
      * unnecessary since Strings are immutable.
      *
+     * 除非需要显示复制 original，否则没必要使用该构造函数
      * @param  original
      *         A {@code String}
      */
@@ -159,6 +166,7 @@ public final class String
      * contents of the character array are copied; subsequent modification of
      * the character array does not affect the newly created string.
      *
+     * 将参数中的 value[] 复制一份，改变 value[] 内容，字符串不会改变
      * @param  value
      *         The initial value of the string
      */
@@ -375,6 +383,8 @@ public final class String
     /* Common private utility method used to bounds check the byte array
      * and requested offset & length values used by the String(byte[],..)
      * constructors.
+     *
+     * 边界检查
      */
     private static void checkBounds(byte[] bytes, int offset, int length) {
         if (length < 0)
@@ -560,6 +570,7 @@ public final class String
      * @param  bytes
      *         The bytes to be decoded into characters
      *
+     * 参数未指定编码格式的话，默认使用系统的编码格式，如果没有指定编码格式，则使用 ISO-8859-1 格式
      * @since  JDK1.1
      */
     public String(byte bytes[]) {
@@ -571,6 +582,8 @@ public final class String
      * currently contained in the string buffer argument. The contents of the
      * string buffer are copied; subsequent modification of the string buffer
      * does not affect the newly created string.
+     *
+     * StringBuffer 需要进行同步处理
      *
      * @param  buffer
      *         A {@code StringBuffer}
@@ -591,6 +604,8 @@ public final class String
      * StringBuilder}. Obtaining a string from a string builder via the {@code
      * toString} method is likely to run faster and is generally preferred.
      *
+     * StringBuilder 不需要进行同步处理
+     *
      * @param   builder
      *          A {@code StringBuilder}
      *
@@ -605,6 +620,10 @@ public final class String
     * this constructor is always expected to be called with share==true.
     * a separate constructor is needed because we already have a public
     * String(char[]) constructor that makes a copy of the given char[].
+    *
+    * default 修饰，仅当前包可使用。
+    * 直接将 this.value 指向参数中的 char[]，不再进行 copy 操作
+    * 性能好，节省内存，外包不可使用，也不会破坏不可变性
     */
     String(char[] value, boolean share) {
         // assert share : "unshared not supported";
@@ -615,6 +634,8 @@ public final class String
      * Returns the length of this string.
      * The length is equal to the number of <a href="Character.html#unicode">Unicode
      * code units</a> in the string.
+     *
+     * 返回字符串长度，等于字符串的 Unicode 代码单元个数
      *
      * @return  the length of the sequence of characters represented by this
      *          object.
@@ -975,17 +996,17 @@ public final class String
      */
     public boolean equals(Object anObject) {
         if (this == anObject) {
-            return true;
+            return true; // 如果是同一个对象，直接返回 true
         }
-        if (anObject instanceof String) {
+        if (anObject instanceof String) { // 判断 anObject 是不是 String
             String anotherString = (String)anObject;
             int n = value.length;
-            if (n == anotherString.value.length) {
+            if (n == anotherString.value.length) { // 判断长度是否相等
                 char v1[] = value;
                 char v2[] = anotherString.value;
                 int i = 0;
                 while (n-- != 0) {
-                    if (v1[i] != v2[i])
+                    if (v1[i] != v2[i]) // 逐个字符比较
                         return false;
                     i++;
                 }
@@ -1049,7 +1070,7 @@ public final class String
         // Argument is a StringBuffer, StringBuilder
         if (cs instanceof AbstractStringBuilder) {
             if (cs instanceof StringBuffer) {
-                synchronized(cs) {
+                synchronized(cs) { // StringBuffer 需要作同步处理
                    return nonSyncContentEquals((AbstractStringBuilder)cs);
                 }
             } else {
@@ -1178,6 +1199,8 @@ public final class String
      * The java.text package provides <em>Collators</em> to allow
      * locale-sensitive ordering.
      *
+     * 忽略大小写 compare
+     *
      * @see     java.text.Collator#compare(String, String)
      * @since   1.2
      */
@@ -1261,6 +1284,8 @@ public final class String
      * {@code this.charAt(toffset + }<i>k</i>{@code ) != other.charAt(ooffset + }
      * <i>k</i>{@code )}
      * </ul>
+     *
+     * 指定区域是否匹配
      *
      * @param   toffset   the starting offset of the subregion in this string.
      * @param   other     the string argument.
@@ -1459,6 +1484,9 @@ public final class String
      * <i>i</i>th character of the string, {@code n} is the length of
      * the string, and {@code ^} indicates exponentiation.
      * (The hash value of the empty string is zero.)
+     *
+     * s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+     * 注意 31 的选取
      *
      * @return  a hash code value for this object.
      */
@@ -1930,7 +1958,7 @@ public final class String
         if (subLen < 0) {
             throw new StringIndexOutOfBoundsException(subLen);
         }
-        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen);
+        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen); // 返回一个 新的 String 对象
     }
 
     /**
@@ -2031,7 +2059,7 @@ public final class String
         int len = value.length;
         char buf[] = Arrays.copyOf(value, len + otherLen);
         str.getChars(buf, len);
-        return new String(buf, true);
+        return new String(buf, true); // 返回新的 String 对象
     }
 
     /**
@@ -2084,7 +2112,7 @@ public final class String
                     buf[i] = (c == oldChar) ? newChar : c;
                     i++;
                 }
-                return new String(buf, true);
+                return new String(buf, true); // 返回新的 String 对象
             }
         }
         return this;
