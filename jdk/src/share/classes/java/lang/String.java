@@ -1958,7 +1958,8 @@ public final class String
         if (subLen < 0) {
             throw new StringIndexOutOfBoundsException(subLen);
         }
-        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen); // 返回一个 新的 String 对象
+        //beginIndex 不为 0， 返回一个 新的 String 对象
+        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen);
     }
 
     /**
