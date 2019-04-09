@@ -84,6 +84,8 @@ public final class StringBuilder
     /**
      * Constructs a string builder with no characters in it and an
      * initial capacity of 16 characters.
+     *
+     * 默认初始容量为 16
      */
     public StringBuilder() {
         super(16);

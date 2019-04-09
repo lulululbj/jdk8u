@@ -29,7 +29,7 @@ import sun.misc.FloatingDecimal;
 import java.util.Arrays;
 
 /**
- * A mutable sequence of characters.
+ * A mutable sequence of characters. 可变字符序列
  * <p>
  * Implements a modifiable string. At any point in time it contains some
  * particular sequence of characters, but the length and content of the
@@ -47,11 +47,15 @@ import java.util.Arrays;
 abstract class AbstractStringBuilder implements Appendable, CharSequence {
     /**
      * The value is used for character storage.
+     *
+     * 存储字符，可修改
      */
     char[] value;
 
     /**
      * The count is the number of characters used.
+     *
+     * 字符数量
      */
     int count;
 
@@ -63,6 +67,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
 
     /**
      * Creates an AbstractStringBuilder of the specified capacity.
+     *
+     * value[] 的初始容量
      */
     AbstractStringBuilder(int capacity) {
         value = new char[capacity];
@@ -120,6 +126,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      */
     private void ensureCapacityInternal(int minimumCapacity) {
         // overflow-conscious code
+        // 容量不够时自动扩容，大小为原容量乘 2 再加 2
         if (minimumCapacity - value.length > 0) {
             value = Arrays.copyOf(value,
                     newCapacity(minimumCapacity));
@@ -131,6 +138,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * Some VMs reserve some header words in an array.
      * Attempts to allocate larger arrays may result in
      * OutOfMemoryError: Requested array size exceeds VM limit
+     *
+     * 数组最大容量
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -158,6 +167,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
 
     private int hugeCapacity(int minCapacity) {
         if (Integer.MAX_VALUE - minCapacity < 0) { // overflow
+            // 大于 int 最大值，直接抛出 OOM
             throw new OutOfMemoryError();
         }
         return (minCapacity > MAX_ARRAY_SIZE)
@@ -197,6 +207,9 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * <p>
      * The {@code newLength} argument must be greater than or equal
      * to {@code 0}.
+     *
+     * 设置数组长度
+     * 如果变长，多出的填充 '\0'
      *
      * @param      newLength   the new length
      * @throws     IndexOutOfBoundsException  if the
@@ -442,12 +455,12 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(String str) {
-        if (str == null)
+        if (str == null) // str 为 null 的话，则追加 "null"
             return appendNull();
         int len = str.length();
-        ensureCapacityInternal(count + len);
-        str.getChars(0, len, value, count);
-        count += len;
+        ensureCapacityInternal(count + len); // 确保容量足够，不够会自动扩容
+        str.getChars(0, len, value, count); // 追加字符串
+        count += len; // 更新 count
         return this;
     }
 
@@ -611,7 +624,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @param   b   a {@code boolean}.
      * @return  a reference to this object.
      */
-    public AbstractStringBuilder append(boolean b) {
+    public AbstractStringBuilder append(boolean b) { // boolean 值特殊处理
         if (b) {
             ensureCapacityInternal(count + 4);
             value[count++] = 't';

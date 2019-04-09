@@ -28,6 +28,8 @@ package java.lang;
 import java.util.Arrays;
 
 /**
+ * 和 StringBuilder 实现基本一致，加了 synchronized 保证线程安全
+ *
  * A thread-safe, mutable sequence of characters.
  * A string buffer is like a {@link String}, but can be modified. At any
  * point in time it contains some particular sequence of characters, but
@@ -102,6 +104,9 @@ import java.util.Arrays;
     /**
      * A cache of the last value returned by toString. Cleared
      * whenever the StringBuffer is modified.
+     *
+     * 缓存上次调用 toString() 的返回值
+     * 一旦 StringBuffer 发生修改就置空，提示 toString() 方法不要使用缓存
      */
     private transient char[] toStringCache;
 
@@ -111,6 +116,8 @@ import java.util.Arrays;
     /**
      * Constructs a string buffer with no characters in it and an
      * initial capacity of 16 characters.
+     *
+     * 默认初始容量为 16
      */
     public StringBuffer() {
         super(16);
