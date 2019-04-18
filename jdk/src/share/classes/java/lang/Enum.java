@@ -58,6 +58,8 @@ public abstract class Enum<E extends Enum<E>>
      * The name of this enum constant, as declared in the enum declaration.
      * Most programmers should use the {@link #toString} method rather than
      * accessing this field.
+     *
+     * 实例名称
      */
     private final String name;
 
@@ -85,6 +87,8 @@ public abstract class Enum<E extends Enum<E>>
      * Most programmers will have no use for this field.  It is designed
      * for use by sophisticated enum-based data structures, such as
      * {@link java.util.EnumSet} and {@link java.util.EnumMap}.
+     *
+     * 在枚举声明中的次序，从 0 开始
      */
     private final int ordinal;
 
@@ -156,6 +160,8 @@ public abstract class Enum<E extends Enum<E>>
      * Throws CloneNotSupportedException.  This guarantees that enums
      * are never cloned, which is necessary to preserve their "singleton"
      * status.
+     *
+     * 不允许 clone
      *
      * @return (never returns)
      */
@@ -245,6 +251,7 @@ public abstract class Enum<E extends Enum<E>>
 
     /**
      * prevent default deserialization
+     * 防止序列化
      */
     private void readObject(ObjectInputStream in) throws IOException,
         ClassNotFoundException {

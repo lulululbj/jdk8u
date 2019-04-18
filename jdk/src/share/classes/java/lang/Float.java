@@ -770,6 +770,7 @@ public final class Float extends Number implements Comparable<Float> {
         int result = floatToRawIntBits(value);
         // Check for NaN based on values of bit fields, maximum
         // exponent and nonzero significand.
+        // 检查 NaN , 直接返回 0x7fc00000
         if ( ((result & FloatConsts.EXP_BIT_MASK) ==
               FloatConsts.EXP_BIT_MASK) &&
              (result & FloatConsts.SIGNIF_BIT_MASK) != 0)
