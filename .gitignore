@@ -15,3 +15,7 @@ Makefile
 README-builds.html
 THIRD_PARTY_README
 README
+
+*/.idea
+*.iml
+.idea/
