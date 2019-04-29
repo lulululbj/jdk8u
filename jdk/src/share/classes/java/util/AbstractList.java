@@ -578,6 +578,9 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * list, or otherwise perturb it in such a fashion that iterations in
      * progress may yield incorrect results.
      *
+     * 集合结构修改的次数。
+     * 结构修改指集合的长度变化，在迭代的过程中修改集合结构可能导致不正确的结果。
+     *
      * <p>This field is used by the iterator and list iterator implementation
      * returned by the {@code iterator} and {@code listIterator} methods.
      * If the value of this field changes unexpectedly, the iterator (or list
@@ -586,6 +589,10 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * {@code set} or {@code add} operations.  This provides
      * <i>fail-fast</i> behavior, rather than non-deterministic behavior in
      * the face of concurrent modification during iteration.
+     *
+     * 这个字段在迭代器 iterator 中使用。如果 modCount 没有按照预期的变化，iterator
+     * 会抛出 ConcurrentModificationException 异常。这提供了 fail-fast 机制，而不是
+     * 让迭代过程中面对并发修改带来的不确定行为。
      *
      * <p><b>Use of this field by subclasses is optional.</b> If a subclass
      * wishes to provide fail-fast iterators (and list iterators), then it
@@ -597,6 +604,11 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * bogus {@code ConcurrentModificationExceptions}.  If an implementation
      * does not wish to provide fail-fast iterators, this field may be
      * ignored.
+     *
+     * 子类中是否使用这个字段是可选的。如果子类想提供 fail-fast 机制，那么它仅仅只需要在
+     *  remove(int)，add(int,E),以及其他的子类重写的会导致集合结构变化的方法。单次调用
+     *  remove(int)，add(int,E) 只能给 modCount 加 1，否则迭代器会抛出 ConcurrentModificationExceptions
+     *  异常。如果子类不想提供 fail-fast 机制，可以忽略这个字段。
      */
     protected transient int modCount = 0;
 
