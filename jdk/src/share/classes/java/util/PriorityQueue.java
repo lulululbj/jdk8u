@@ -38,12 +38,18 @@ import sun.misc.SharedSecrets;
  * insertion of non-comparable objects (doing so may result in
  * {@code ClassCastException}).
  *
+ * 基于优先级堆实现的无界优先级队列。优先级队列中的元素顺序根据元素的自然序或者构造器
+ * 中提供的 Comparator。不允许 null 元素，不允许插入不可比较的元素(未实现 Comparable)
+ *
  * <p>The <em>head</em> of this queue is the <em>least</em> element
  * with respect to the specified ordering.  If multiple elements are
  * tied for least value, the head is one of those elements -- ties are
  * broken arbitrarily.  The queue retrieval operations {@code poll},
  * {@code remove}, {@code peek}, and {@code element} access the
  * element at the head of the queue.
+ *
+ * 队列头是按给定排序顺序最小的元素。如果有多个元素都可以作为最小值，那么队列头是
+ * 他们其中之一 。队列提供了 poll, remove(), peek(), element() 方法来返回队列头。
  *
  * <p>A priority queue is unbounded, but has an internal
  * <i>capacity</i> governing the size of an array used to store the
@@ -52,6 +58,9 @@ import sun.misc.SharedSecrets;
  * grows automatically.  The details of the growth policy are not
  * specified.
  *
+ * 优先队列是无界的，但是它有一个内部容量来控制储存队列元素的数组的大小，
+ * 它总是至少和队列一样大。当元素不断加入优先级队列，他会自动扩容。
+ *
  * <p>This class and its iterator implement all of the
  * <em>optional</em> methods of the {@link Collection} and {@link
  * Iterator} interfaces.  The Iterator provided in method {@link
@@ -59,11 +68,16 @@ import sun.misc.SharedSecrets;
  * the priority queue in any particular order. If you need ordered
  * traversal, consider using {@code Arrays.sort(pq.toArray())}.
  *
+ * 该类和它的迭代器 iterator 实现了 Collection 和 Iterator 接口的所有方法。
+ * iterator() 方法提供的迭代器并不保证按任何特定顺序迭代元素。
+ *
  * <p><strong>Note that this implementation is not synchronized.</strong>
  * Multiple threads should not access a {@code PriorityQueue}
  * instance concurrently if any of the threads modifies the queue.
  * Instead, use the thread-safe {@link
  * java.util.concurrent.PriorityBlockingQueue} class.
+ *
+ * 该类实现不保证线程安全。如需保证线程安全，可使用 PriorityBlockingQueue
  *
  * <p>Implementation note: this implementation provides
  * O(log(n)) time for the enqueuing and dequeuing methods
@@ -71,6 +85,8 @@ import sun.misc.SharedSecrets;
  * linear time for the {@code remove(Object)} and {@code contains(Object)}
  * methods; and constant time for the retrieval methods
  * ({@code peek}, {@code element}, and {@code size}).
+ *
+ * 入队和出队的时间复杂度是 O(log(n))
  *
  * <p>This class is a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
@@ -85,7 +101,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
 
     private static final long serialVersionUID = -7720805057305804111L;
 
-    private static final int DEFAULT_INITIAL_CAPACITY = 11;
+    private static final int DEFAULT_INITIAL_CAPACITY = 11; // 默认初始容量
 
     /**
      * Priority queue represented as a balanced binary heap: the two
@@ -94,6 +110,10 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * natural ordering, if comparator is null: For each node n in the
      * heap and each descendant d of n, n <= d.  The element with the
      * lowest value is in queue[0], assuming the queue is nonempty.
+     *
+     * 优先级队列可以看成用数组表示的平衡二叉堆：queue[n] 的两个子节点分别是
+     * queue[2*n+1] 和 queue[2*(n+1)]。堆中每个节点 n 及其子节点 d 具有如下关系：
+     * n <= d 。queue[0] 是最小的元素。
      */
     transient Object[] queue; // non-private to simplify nested class access
 
@@ -105,12 +125,16 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     /**
      * The comparator, or null if priority queue uses elements'
      * natural ordering.
+     *
+     * comparator 为 null 则按照元素的自然序排序
      */
     private final Comparator<? super E> comparator;
 
     /**
      * The number of times this priority queue has been
      * <i>structurally modified</i>.  See AbstractList for gory details.
+     *
+     * fail-fast
      */
     transient int modCount = 0; // non-private to simplify nested class access
 
@@ -118,6 +142,8 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Creates a {@code PriorityQueue} with the default initial
      * capacity (11) that orders its elements according to their
      * {@linkplain Comparable natural ordering}.
+     *
+     * 创建初始容量为 11 的优先级队列，元素按照自然序
      */
     public PriorityQueue() {
         this(DEFAULT_INITIAL_CAPACITY, null);
@@ -127,6 +153,8 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Creates a {@code PriorityQueue} with the specified initial
      * capacity that orders its elements according to their
      * {@linkplain Comparable natural ordering}.
+     *
+     * 创建指定初始容量的优先级队列，元素按照自然序
      *
      * @param initialCapacity the initial capacity for this priority queue
      * @throws IllegalArgumentException if {@code initialCapacity} is less
@@ -140,6 +168,8 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Creates a {@code PriorityQueue} with the default initial capacity and
      * whose elements are ordered according to the specified comparator.
      *
+     * 创建初始容量为 11 的优先级队列，元素按照按照给定 comparator 排序
+     *
      * @param  comparator the comparator that will be used to order this
      *         priority queue.  If {@code null}, the {@linkplain Comparable
      *         natural ordering} of the elements will be used.
@@ -152,6 +182,8 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     /**
      * Creates a {@code PriorityQueue} with the specified initial capacity
      * that orders its elements according to the specified comparator.
+     *
+     * 创建指定初始容量的优先级队列，元素按照按照给定 comparator 排序
      *
      * @param  initialCapacity the initial capacity for this priority queue
      * @param  comparator the comparator that will be used to order this
@@ -200,7 +232,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         }
         else {
             this.comparator = null;
-            initFromCollection(c);
+            initFromCollection(c); // 需要堆化
         }
     }
 
@@ -281,11 +313,17 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Some VMs reserve some header words in an array.
      * Attempts to allocate larger arrays may result in
      * OutOfMemoryError: Requested array size exceeds VM limit
+     *
+     * 出现过很多次的 MAX_ARRAY_SIZE，基本只要是数组的最大容量，都是
+     * Integer.MAX_VALUE -8
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     /**
      * Increases the capacity of the array.
+     *
+     * 原容量小于 64 时，翻倍 + 2，
+     * 大于 64 时，增加 50%
      *
      * @param minCapacity the desired minimum capacity
      */
@@ -337,18 +375,18 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         modCount++;
         int i = size;
         if (i >= queue.length)
-            grow(i + 1);
+            grow(i + 1); // 自动扩容
         size = i + 1;
         if (i == 0)
-            queue[0] = e;
+            queue[0] = e; // 第一个元素，直接赋值即可
         else
-            siftUp(i, e);
+            siftUp(i, e); // 后续元素要保证堆特性，要进行堆化
         return true;
     }
 
     @SuppressWarnings("unchecked")
     public E peek() {
-        return (size == 0) ? null : (E) queue[0];
+        return (size == 0) ? null : (E) queue[0]; // 返回队列头
     }
 
     private int indexOf(Object o) {
@@ -532,7 +570,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
 
         @SuppressWarnings("unchecked")
         public E next() {
-            if (expectedModCount != modCount)
+            if (expectedModCount != modCount) // fail-fast
                 throw new ConcurrentModificationException();
             if (cursor < size)
                 return (E) queue[lastRet = cursor++];
@@ -584,7 +622,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     }
 
     @SuppressWarnings("unchecked")
-    public E poll() {
+    public E poll() { // 移除队列头
         if (size == 0)
             return null;
         int s = --size;
@@ -608,6 +646,9 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * that was previously at the end of the list and is now at some
      * position before i. This fact is used by iterator.remove so as to
      * avoid missing traversing elements.
+     *
+     * 删除堆中的某个元素，会造成堆不完整，不再满足堆的特性。这里的做法是将
+     * 堆中最后一个元素放入删除产生的空洞，再重新堆化
      */
     @SuppressWarnings("unchecked")
     private E removeAt(int i) {
@@ -615,13 +656,13 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         modCount++;
         int s = --size;
         if (s == i) // removed last element
-            queue[i] = null;
-        else {
-            E moved = (E) queue[s];
+            queue[i] = null; // 删除队尾，可直接删除
+        else { // 删除其他位置，为保持堆特性，需要重新堆化
+            E moved = (E) queue[s]; // moved 是队尾元素
             queue[s] = null;
-            siftDown(i, moved);
+            siftDown(i, moved); // 将队尾元素插入 i 位置，再自上而下堆化
             if (queue[i] == moved) {
-                siftUp(i, moved);
+                siftUp(i, moved); // moved 没有往下交换，仍然在 i 位置处，此时需要再自下而上堆化以保证堆的正确性
                 if (queue[i] != moved)
                     return moved;
             }
@@ -638,8 +679,10 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Comparable and Comparator versions are separated into different
      * methods that are otherwise identical. (Similarly for siftDown.)
      *
-     * @param k the position to fill
-     * @param x the item to insert
+     * 自下而上堆化，保证该节点大于等于父节点
+     *
+     * @param k the position to fill 插入位置
+     * @param x the item to insert 插入元素
      */
     private void siftUp(int k, E x) {
         if (comparator != null)
@@ -665,12 +708,12 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     @SuppressWarnings("unchecked")
     private void siftUpUsingComparator(int k, E x) {
         while (k > 0) {
-            int parent = (k - 1) >>> 1;
+            int parent = (k - 1) >>> 1; // 找到 k 位置的父节点
             Object e = queue[parent];
-            if (comparator.compare(x, (E) e) >= 0)
-                break;
-            queue[k] = e;
-            k = parent;
+            if (comparator.compare(x, (E) e) >= 0) // 比较 x 与父节点值的大小
+                break; // x 比父节点大，直接跳出循环
+            queue[k] = e; // 若 x 比父节点小，交换元素
+            k = parent; // 此时 k 等于 parent，继续和父节点比较
         }
         queue[k] = x;
     }
@@ -679,6 +722,8 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * Inserts item x at position k, maintaining heap invariant by
      * demoting x down the tree repeatedly until it is less than or
      * equal to its children or is a leaf.
+     *
+     * 自上而下堆化，保证 x 小于等于子节点或者 x 是一个叶子结点
      *
      * @param k the position to fill
      * @param x the item to insert
@@ -694,14 +739,14 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     private void siftDownComparable(int k, E x) {
         Comparable<? super E> key = (Comparable<? super E>)x;
         int half = size >>> 1;        // loop while a non-leaf
-        while (k < half) {
+        while (k < half) { // 堆的非叶子节点的个数总是小于 half 的。当 k 是叶子节点的时候，直接交换即可
             int child = (k << 1) + 1; // assume left child is least
             Object c = queue[child];
             int right = child + 1;
             if (right < size &&
                 ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0)
-                c = queue[child = right];
-            if (key.compareTo((E) c) <= 0)
+                c = queue[child = right]; // 取子节点中的较大值
+            if (key.compareTo((E) c) <= 0) // 比较 x 和子节点
                 break;
             queue[k] = c;
             k = child;
@@ -730,11 +775,13 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     /**
      * Establishes the heap invariant (described above) in the entire tree,
      * assuming nothing about the order of the elements prior to the call.
+     *
+     * 堆化
      */
     @SuppressWarnings("unchecked")
     private void heapify() {
         for (int i = (size >>> 1) - 1; i >= 0; i--)
-            siftDown(i, (E) queue[i]);
+            siftDown(i, (E) queue[i]); // 对所有叶子结点自下而上堆化
     }
 
     /**
