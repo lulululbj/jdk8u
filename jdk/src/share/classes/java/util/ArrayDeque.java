@@ -47,6 +47,10 @@ import sun.misc.SharedSecrets;
  * {@link Stack} when used as a stack, and faster than {@link LinkedList}
  * when used as a queue.
  *
+ * 可变长数组实现的双端队列。ArrayDeque 没有容量限制，必要时自动扩容。
+ * 它不是线程安全的，不支持多线程并发访问。禁止 null 元素。
+ * 作为栈使用时比 Stack 要快些，作为队列使用时要比 LinkedList 快些
+ *
  * <p>Most {@code ArrayDeque} operations run in amortized constant time.
  * Exceptions include {@link #remove(Object) remove}, {@link
  * #removeFirstOccurrence removeFirstOccurrence}, {@link #removeLastOccurrence
@@ -95,6 +99,11 @@ public class ArrayDeque<E> extends AbstractCollection<E>
      * thus avoiding head and tail wrapping around to equal each
      * other.  We also guarantee that all array cells not holding
      * deque elements are always null.
+     *
+     * ArrayDeque 存储元素的数组，数组的长度必须是 2 的次幂。
+     * 数组永远不会被填充满，除了调用 addX 方法造成的自动扩容，这样避免了 head
+     * 和 tail 相等
+     *
      */
     transient Object[] elements; // non-private to simplify nested class access
 
@@ -102,18 +111,25 @@ public class ArrayDeque<E> extends AbstractCollection<E>
      * The index of the element at the head of the deque (which is the
      * element that would be removed by remove() or pop()); or an
      * arbitrary number equal to tail if the deque is empty.
+     *
+     * 指向队列头元素，remove() 和 pop() 都是删除 head。
+     * 队列为空时 head == tail
      */
     transient int head;
 
     /**
      * The index at which the next element would be added to the tail
      * of the deque (via addLast(E), add(E), or push(E)).
+     *
+     * addLast(),add(E),push(E) 插入元素的位置，即最后一个元素后面的位置
      */
     transient int tail;
 
     /**
      * The minimum capacity that we'll use for a newly created deque.
      * Must be a power of 2.
+     *
+     * 新建队列的最小容量，必须是 2 的次幂
      */
     private static final int MIN_INITIAL_CAPACITY = 8;
 
@@ -123,6 +139,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
         int initialCapacity = MIN_INITIAL_CAPACITY;
         // Find the best power of two to hold elements.
         // Tests "<=" because arrays aren't kept full.
+        // 找到合适的容量，容量必须是 2 的次幂
         if (numElements >= initialCapacity) {
             initialCapacity = numElements;
             initialCapacity |= (initialCapacity >>>  1);
@@ -150,6 +167,8 @@ public class ArrayDeque<E> extends AbstractCollection<E>
     /**
      * Doubles the capacity of this deque.  Call only when full, i.e.,
      * when head and tail have wrapped around to become equal.
+     *
+     * 扩容队列容量至 Double。仅当队列已满时才会扩容。
      */
     private void doubleCapacity() {
         assert head == tail;
@@ -239,6 +258,8 @@ public class ArrayDeque<E> extends AbstractCollection<E>
     /**
      * Inserts the specified element at the end of this deque.
      *
+     * 在队尾添加元素
+     *
      * <p>This method is equivalent to {@link #add}.
      *
      * @param e the element to add
@@ -248,6 +269,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
         if (e == null)
             throw new NullPointerException();
         elements[tail] = e;
+        // 由于 elements.length 为 2的次幂，& (elements.length - 1) 就相当于 % elements.length
         if ( (tail = (tail + 1) & (elements.length - 1)) == head)
             doubleCapacity();
     }
@@ -586,7 +608,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
      *
      * @return the number of elements in this deque
      */
-    public int size() {
+    public int size() { // 可能存在 head > tail 的情况
         return (tail - head) & (elements.length - 1);
     }
 
