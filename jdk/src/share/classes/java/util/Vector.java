@@ -48,6 +48,9 @@ import java.util.function.UnaryOperator;
  * capacity of a vector before inserting a large number of
  * components; this reduces the amount of incremental reallocation.
  *
+ * Vector 基于动态数组实现，可以基于下标进行访问。
+ * 数组大小可以根据增加、删除元素动态变化
+ *
  * <p><a name="fail-fast">
  * The iterators returned by this class's {@link #iterator() iterator} and
  * {@link #listIterator(int) listIterator} methods are <em>fail-fast</em></a>:
@@ -92,6 +95,8 @@ public class Vector<E>
      * stored. The capacity of the vector is the length of this array buffer,
      * and is at least large enough to contain all the vector's elements.
      *
+     * 存储元素的数组
+     *
      * <p>Any array elements following the last element in the Vector are null.
      *
      * @serial
@@ -102,6 +107,8 @@ public class Vector<E>
      * The number of valid components in this {@code Vector} object.
      * Components {@code elementData[0]} through
      * {@code elementData[elementCount-1]} are the actual items.
+     *
+     * Vector 中合法元素的个数
      *
      * @serial
      */
@@ -260,6 +267,8 @@ public class Vector<E>
     private void grow(int minCapacity) {
         // overflow-conscious code
         int oldCapacity = elementData.length;
+        // 如果 capacityIncrement > 0 ，就在原始容量上加 capacityIncrement
+        // 其他情况，直接翻倍
         int newCapacity = oldCapacity + ((capacityIncrement > 0) ?
                                          capacityIncrement : oldCapacity);
         if (newCapacity - minCapacity < 0)

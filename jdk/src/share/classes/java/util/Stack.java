@@ -36,11 +36,15 @@ package java.util;
  * <p>
  * When a stack is first created, it contains no items.
  *
+ * Stack 表示后入先出队列，它继承自 Vector, 提供了一些方法使之可以当做栈来处理。
+ *
  * <p>A more complete and consistent set of LIFO stack operations is
  * provided by the {@link Deque} interface and its implementations, which
  * should be used in preference to this class.  For example:
  * <pre>   {@code
  *   Deque<Integer> stack = new ArrayDeque<Integer>();}</pre>
+ *
+ * 关于 LIFO 栈，更好的选择是 Deque 及其实现类，例如 ArrayDeque
  *
  * @author  Jonathan Payne
  * @since   JDK1.0
@@ -59,6 +63,8 @@ class Stack<E> extends Vector<E> {
      * <blockquote><pre>
      * addElement(item)</pre></blockquote>
      *
+     * 入栈
+     *
      * @param   item   the item to be pushed onto this stack.
      * @return  the <code>item</code> argument.
      * @see     java.util.Vector#addElement
@@ -72,6 +78,8 @@ class Stack<E> extends Vector<E> {
     /**
      * Removes the object at the top of this stack and returns that
      * object as the value of this function.
+     *
+     * 出栈
      *
      * @return  The object at the top of this stack (the last item
      *          of the <tt>Vector</tt> object).
@@ -90,6 +98,8 @@ class Stack<E> extends Vector<E> {
     /**
      * Looks at the object at the top of this stack without removing it
      * from the stack.
+     *
+     * 获取栈顶元素
      *
      * @return  the object at the top of this stack (the last item
      *          of the <tt>Vector</tt> object).
