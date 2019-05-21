@@ -175,15 +175,15 @@ public class ArrayDeque<E> extends AbstractCollection<E>
         int p = head;
         int n = elements.length;
         int r = n - p; // number of elements to the right of p
-        int newCapacity = n << 1;
-        if (newCapacity < 0)
+        int newCapacity = n << 1; // 扩容一倍
+        if (newCapacity < 0) // newCapacity 小于 0，表示发生溢出
             throw new IllegalStateException("Sorry, deque too big");
         Object[] a = new Object[newCapacity];
         System.arraycopy(elements, p, a, 0, r);
         System.arraycopy(elements, 0, a, r, p);
         elements = a;
         head = 0;
-        tail = n;
+        tail = n; // 更新 head,tail
     }
 
     /**
@@ -269,6 +269,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
         if (e == null)
             throw new NullPointerException();
         elements[tail] = e;
+        // 队列满判定条件是  (tail + 1) % length = head ，这里用位运算代替了 %
         // 由于 elements.length 为 2的次幂，& (elements.length - 1) 就相当于 % elements.length
         if ( (tail = (tail + 1) & (elements.length - 1)) == head)
             doubleCapacity();
